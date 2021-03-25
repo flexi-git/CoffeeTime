@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:CoffeeTime"
+             xmlns:controls="clr-namespace:CoffeeTime.Controls" 
+             x:Class="CoffeeTime.MainPage">
+
+    <Grid>
+
+        <ContentView x:Name="MyBagView" >
+            <Grid RowDefinitions="*, Auto, Auto">                
+                <BoxView Grid.RowSpan="3" Color="{StaticResource AccentColor}" />
+
+                <StackLayout Margin="20, 30, 20, 0">
+                    <Label Text="My Bag"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           Style="{StaticResource HeaderTextLight}" />
+                    
+                    <StackLayout BindableLayout.ItemsSource="{Binding Items}" Orientation="Vertical" Margin="0, 10, 0, 0" Spacing="20">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="60, *, Auto">
+                                    <Image Source="{local:ImageResource CoffeeTime.assets.img.MochaFrappuccino.png}"
+                                           WidthRequest="60"
+                                           HeightRequest="60" />
+                                    <StackLayout Grid.Column="1">
+                                        <Label Text="{Binding Name}" Style="{StaticResource ShoppingItemHeader}" />
+                                        <Label Text="{Binding Size, StringFormat='Size {0}'}" Style="{StaticResource ShoppingItemDetail}" />
+                                        <Label Text="{Binding Price, StringFormat='{0:C2}'}" Style="{StaticResource ShoppingItemDetail}" />
+                                    </StackLayout>
+                                    <Label Text="{Binding Quantity, StringFormat='x{0}'}" 
+                                           Grid.Column="2"
+                                           HorizontalTextAlignment="End"
+                                           VerticalOptions="Center"
+                                           Style="{StaticResource HeaderTextLight}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+
+                    </StackLayout>
+                </StackLayout>
+
+                <Grid ColumnDefinitions="*,*" Grid.Row="1" Margin="20, 0" >
+                    <BoxView HeightRequest="1"                             
+                             BackgroundColor="{StaticResource TextColorLight}"
+                             VerticalOptions="Start"
+                             Grid.ColumnSpan="2" />
+                    <Label Text="Total"
+                           Margin="0, 10"
+                           Grid.Column="0"
+                           Style="{StaticResource HeaderTextLight}" />
+                    <Label Text="{Binding TotalPrice, StringFormat='{0:C2}'}"
+                           Margin="0, 10, 8, 0"
+                           Grid.Column="1"
+                           HorizontalTextAlignment="End"
+                           Style="{StaticResource HeaderTextLight}" />
+                </Grid>
+                <StackLayout Grid.Row="2"
+                             Margin="20, -10, 20, 20" 
+                             VerticalOptions="End" >
+                    <Button x:Name="Confirm" 
+                        Text="Confirm Order" 
+                        TextTransform="None"
+                        Margin="0" 
+                        CornerRadius="20" 
+                        TextColor="{StaticResource AccentColor}" 
+                        BackgroundColor="White"
+                        />
+                </StackLayout>
+            </Grid>
+            
+        </ContentView>
+
+
+        <ContentView x:Name="FrontCard" IsVisible="false">
+            <Grid RowDefinitions="*, Auto, Auto, Auto, 25">
+                
+                <BoxView 
+                    Grid.RowSpan="5"
+                    CornerRadius="0, 0, 25, 25"
+                    Color="{StaticResource FontCardBackground}" />
+
+                <Ellipse HeightRequest="250"
+                         WidthRequest="250"
+                         HorizontalOptions="Center"
+                         VerticalOptions="Center"
+                         Fill="#F8F8F8"/>
+                <!--<Image Source="{local:ImageResource CoffeeTime.assets.img.MochaFrappuccino.png}" />-->
+                <Image Source="{Binding SelectedItem.ImageUrl}" />
+                
+                <StackLayout Grid.Row="1" Margin="20">
+                    <Label Text="{Binding SelectedItem.Name}"
+                           HorizontalOptions="Center"
+                           Style="{StaticResource HeaderText}" />
+                    <Label Text="{Binding SelectedItem.Description}"
+                           Style="{StaticResource DescriptionText}" />
+                </StackLayout>
+
+                <Grid Grid.Row="2"
+                      Margin="20"
+                      ColumnDefinitions="*, Auto"
+                      HeightRequest="60">
+
+                    <StackLayout
+                        Orientation="Horizontal"
+                        Spacing="0"
+                        VerticalOptions="Center">
+                        <Label Style="{StaticResource SmallCurrencyText}" Text="$" />
+                        <controls:FlipLabel
+                            x:Name="DollarFlip"
+                            AnimationSpeed="100"
+                            NumberOfCharacters="1"
+                            Text="3"
+                            TextStyle="{StaticResource LargeCurrencyText}" />
+                        <Label Style="{StaticResource SmallCurrencyText}" Text="." />
+                        <controls:FlipLabel
+                            x:Name="CentsFlip"
+                            AnimationSpeed="100"
+                            NumberOfCharacters="2"
+                            Text="45"
+                            TextStyle="{StaticResource SmallCurrencyText}" />
+                    </StackLayout>
+
+                    <Grid Grid.Column="1" ColumnDefinitions="60,60,60">
+                        <Rectangle
+                            x:Name="SmallRect"
+                            Fill="#F8F8F8"
+                            HeightRequest="60"
+                            RadiusX="4"
+                            RadiusY="4"
+                            Stroke="#E1E1E1"
+                            StrokeThickness="2"
+                            WidthRequest="60">
+                            <Rectangle.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="SmallSized_Tapped" />
+                            </Rectangle.GestureRecognizers>
+                        </Rectangle>
+                        <Path
+                            x:Name="SmallCup"
+                            Data="M4 13H24L22 40H6ZM3 7H25A2 2 0 0127 9V11A2 2 0 0125 13H3A2 2 0 011 11V9A2 2 0 013 7ZM6 1H22A2 2 0 0124 3V7H4V3A2 2 0 016 1Z"
+                            HorizontalOptions="Center"
+                            InputTransparent="True"
+                            Scale=".6"
+                            Stroke="#1B714B"
+                            StrokeThickness="2"
+                            VerticalOptions="Center" />
+
+                        <Rectangle
+                            x:Name="MediumRect"
+                            Grid.Column="1"
+                            Fill="#F8F8F8"
+                            HeightRequest="60"
+                            RadiusX="4"
+                            RadiusY="4"
+                            Stroke="#E1E1E1"
+                            StrokeThickness="2"
+                            WidthRequest="60">
+                            <Rectangle.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="MediumSized_Tapped" />
+                            </Rectangle.GestureRecognizers>
+
+                        </Rectangle>
+                        <Path
+                            x:Name="MediumCup"
+                            Grid.Column="1"
+                            Data="M4 13H24L22 40H6ZM3 7H25A2 2 0 0127 9V11A2 2 0 0125 13H3A2 2 0 011 11V9A2 2 0 013 7ZM6 1H22A2 2 0 0124 3V7H4V3A2 2 0 016 1Z"
+                            HorizontalOptions="Center"
+                            InputTransparent="True"
+                            Scale=".8"
+                            Stroke="#E1E1E1"
+                            StrokeThickness="2"
+                            VerticalOptions="Center" />
+
+                        <Rectangle
+                            x:Name="LargeRect"
+                            Grid.Column="2"
+                            Fill="#F8F8F8"
+                            HeightRequest="60"
+                            RadiusX="4"
+                            RadiusY="4"
+                            Stroke="#E1E1E1"
+                            StrokeThickness="2"
+                            WidthRequest="60">
+                            <Rectangle.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="LargeSized_Tapped" />
+                            </Rectangle.GestureRecognizers>
+                        </Rectangle>
+                        <Path
+                            x:Name="LargeCup"
+                            Grid.Column="2"
+                            Data="M4 13H24L22 40H6ZM3 7H25A2 2 0 0127 9V11A2 2 0 0125 13H3A2 2 0 011 11V9A2 2 0 013 7ZM6 1H22A2 2 0 0124 3V7H4V3A2 2 0 016 1Z"
+                            HorizontalOptions="Center"
+                            InputTransparent="True"
+                            Scale="1"
+                            Stroke="#E1E1E1"
+                            StrokeThickness="2"
+                            VerticalOptions="Center" />
+
+                        <Rectangle
+                            x:Name="SelectionRect"
+                            HeightRequest="60"
+                            InputTransparent="True"
+                            RadiusX="4"
+                            RadiusY="4"
+                            Stroke="#1B714B"
+                            StrokeThickness="2"
+                            WidthRequest="60" />
+                    </Grid>
+                </Grid>
+
+                <Button x:Name="AddToCart" 
+                        Text="Add To Cart" 
+                        TextTransform="None"
+                        Grid.Row="3" 
+                        Margin="20, 10" 
+                        CornerRadius="20" 
+                        TextColor="White" 
+                        BackgroundColor="{StaticResource AccentColor}"
+                        Clicked="AddToCart_Clicked"/>
+
+                <!-- hit box for pangesture recognizer -->
+                <BoxView Grid.Row="4">
+                    <BoxView.GestureRecognizers>
+                        <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated" />
+                        <!--<SwipeGestureRecognizer Direction="Up" Swiped="SwipeUp_Swiped" />
+                        <SwipeGestureRecognizer Direction="Down" Swiped="SwipeDown_Swiped" />-->
+                    </BoxView.GestureRecognizers>
+                </BoxView>
+                
+                <BoxView x:Name="Thumb"
+                    Grid.Row="4" 
+                    CornerRadius="2"
+                    HeightRequest="4"
+                    Opacity="0"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center" 
+                    WidthRequest="80"
+                    Color="{StaticResource TextColorLight}">
+                </BoxView>
+            </Grid>            
+        </ContentView>
+
+    </Grid>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <!--<StackLayout>
+        <Frame BackgroundColor="#2196F3" Padding="24" CornerRadius="0">
+            <Label Text="Welcome to Xamarin.Forms!" HorizontalTextAlignment="Center" TextColor="White" FontSize="36"/>
+        </Frame>
+        <Label Text="Start developing now" FontSize="Title" Padding="30,10,30,10"/>
+        <Label Text="Make changes to your XAML file and save to see your UI update in the running app with XAML Hot Reload. Give it a try!" FontSize="16" Padding="30,0,30,0"/>
+        <Label FontSize="16" Padding="30,24,30,0">
+            <Label.FormattedText>
+                <FormattedString>
+                    <FormattedString.Spans>
+                        <Span Text="Learn more at "/>
+                        <Span Text="https://aka.ms/xamarin-quickstart" FontAttributes="Bold"/>
+                    </FormattedString.Spans>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+    </StackLayout>-->
+
+</ContentPage>
