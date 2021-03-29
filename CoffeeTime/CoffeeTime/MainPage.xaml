@@ -3,63 +3,135 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:CoffeeTime"
              xmlns:controls="clr-namespace:CoffeeTime.Controls" 
-             x:Class="CoffeeTime.MainPage">
+             xmlns:lottie="clr-namespace:Lottie.Forms;assembly=Lottie.Forms"
+             x:Class="CoffeeTime.MainPage"
+             BackgroundColor="{StaticResource AccentColor}">
 
     <Grid>
 
         <ContentView x:Name="MyBagView" >
-            <Grid RowDefinitions="*, Auto, Auto">                
-                <BoxView Grid.RowSpan="3" Color="{StaticResource AccentColor}" />
+            <Grid>
 
-                <StackLayout Margin="20, 30, 20, 0">
-                    <Label Text="My Bag"
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center"
-                           Style="{StaticResource HeaderTextLight}" />
-                    
-                    <StackLayout BindableLayout.ItemsSource="{Binding Items}" Orientation="Vertical" Margin="0, 10, 0, 0" Spacing="20">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate>
-                                <Grid ColumnDefinitions="60, *, Auto">
-                                    <Image Source="{local:ImageResource CoffeeTime.assets.img.MochaFrappuccino.png}"
+                <Grid x:Name="PeekDetails" ColumnDefinitions="*, Auto" 
+                      RowSpacing="0"
+                      VerticalOptions="End">
+                    <ScrollView Grid.Column="0" Orientation="Horizontal">
+                        <StackLayout x:Name="PeekItems" Orientation="Horizontal" Margin="10" Spacing="0"
+                                     BindableLayout.ItemsSource="{Binding Items}"
+                                     HeightRequest="50">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="50" VerticalOptions="Center">
+                                        <Ellipse WidthRequest="40" HeightRequest="40"
+                                                 Fill="Black"
+                                                 Opacity="0.3"
+                                                 HorizontalOptions="Center"
+                                                 VerticalOptions="Center" />
+                                        <Image Source="{local:ImageResource CoffeeTime.assets.img.MochaFrappuccino.png}"
+                                               WidthRequest="50"
+                                               HeightRequest="50"
+                                               VerticalOptions="Center"
+                                               TranslationY="-5">
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="RemoveItemFromCart_Tapped" />
+                                            </Image.GestureRecognizers>
+                                        </Image>
+                                        <Ellipse WidthRequest="16" HeightRequest="16"
+                                                 Fill="White"
+                                                 HorizontalOptions="Center"
+                                                 VerticalOptions="Center" 
+                                                 TranslationX="16"
+                                                 TranslationY="-16" />
+                                        <Label Text="{Binding Size}" FontSize="10" 
+                                               HeightRequest="16"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center" 
+                                               TranslationX="16"
+                                               TranslationY="-16"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </StackLayout>
+                    </ScrollView>
+                    <StackLayout Grid.Column="1"
+                                 Margin="0, 0, 20, 0"
+                                 HeightRequest="50"
+                                 Orientation="Horizontal"
+                                 Spacing="0"
+                                 VerticalOptions="Center"
+                                 HorizontalOptions="End">
+                        <Label Style="{StaticResource PeekTotalText}" Text="$" />
+                        <controls:FlipLabel
+                            x:Name="PeekDollarFlip"
+                            AnimationSpeed="100"
+                            NumberOfCharacters="1"
+                            Text="3"
+                            TextStyle="{StaticResource PeekTotalText}" />
+                        <Label Style="{StaticResource PeekTotalText}" Text="." />
+                        <controls:FlipLabel
+                            x:Name="PeekCentsFlip"
+                            AnimationSpeed="100"
+                            NumberOfCharacters="2"
+                            Text="45"
+                            TextStyle="{StaticResource PeekTotalText}" />
+                    </StackLayout>
+                </Grid>
+                <Grid IsVisible="true" x:Name="MyBagDetails"
+                      RowDefinitions="*, Auto, Auto">
+                    <BoxView Grid.RowSpan="3" Color="{StaticResource AccentColor}" />
+
+                    <StackLayout Margin="20, 40, 20, 20">
+                        <Label Text="My Bag"
+                               HorizontalOptions="Center"
+                               Style="{StaticResource HeaderText}"
+                               TextColor="White"/>
+
+                        <CollectionView ItemsSource="{Binding Items}" 
+                                        Margin="0, 10, 0, 0" >
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="20" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="60, *, Auto">
+                                        <Image Source="{local:ImageResource CoffeeTime.assets.img.MochaFrappuccino.png}"
                                            WidthRequest="60"
                                            HeightRequest="60" />
-                                    <StackLayout Grid.Column="1">
-                                        <Label Text="{Binding Name}" Style="{StaticResource ShoppingItemHeader}" />
-                                        <Label Text="{Binding Size, StringFormat='Size {0}'}" Style="{StaticResource ShoppingItemDetail}" />
-                                        <Label Text="{Binding Price, StringFormat='{0:C2}'}" Style="{StaticResource ShoppingItemDetail}" />
-                                    </StackLayout>
-                                    <Label Text="{Binding Quantity, StringFormat='x{0}'}" 
+                                        <StackLayout Grid.Column="1">
+                                            <Label Text="{Binding Name}" Style="{StaticResource ShoppingItemHeader}" />
+                                            <Label Text="{Binding Size, StringFormat='Size {0}'}" Style="{StaticResource ShoppingItemDetail}" />
+                                            <Label Text="{Binding Price, StringFormat='{0:C2}'}" Style="{StaticResource ShoppingItemDetail}" />
+                                        </StackLayout>
+                                        <Label Text="{Binding Quantity, StringFormat='x{0}'}" 
                                            Grid.Column="2"
                                            HorizontalTextAlignment="End"
                                            VerticalOptions="Center"
                                            Style="{StaticResource HeaderTextLight}"/>
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
                     </StackLayout>
-                </StackLayout>
 
-                <Grid ColumnDefinitions="*,*" Grid.Row="1" Margin="20, 0" >
-                    <BoxView HeightRequest="1"                             
+                    <Grid ColumnDefinitions="*,*" Grid.Row="1" Margin="20, 0" >
+                        <BoxView HeightRequest="1"                             
                              BackgroundColor="{StaticResource TextColorLight}"
                              VerticalOptions="Start"
                              Grid.ColumnSpan="2" />
-                    <Label Text="Total"
+                        <Label Text="Total"
                            Margin="0, 10"
                            Grid.Column="0"
                            Style="{StaticResource HeaderTextLight}" />
-                    <Label Text="{Binding TotalPrice, StringFormat='{0:C2}'}"
+                        <Label Text="{Binding TotalPrice, StringFormat='{0:C2}'}"
                            Margin="0, 10, 8, 0"
                            Grid.Column="1"
                            HorizontalTextAlignment="End"
                            Style="{StaticResource HeaderTextLight}" />
-                </Grid>
-                <StackLayout Grid.Row="2"
+                    </Grid>
+                    <StackLayout Grid.Row="2"
                              Margin="20, -10, 20, 20" 
                              VerticalOptions="End" >
-                    <Button x:Name="Confirm" 
+                        <Button x:Name="Confirm" 
                         Text="Confirm Order" 
                         TextTransform="None"
                         Margin="0" 
@@ -67,13 +139,15 @@
                         TextColor="{StaticResource AccentColor}" 
                         BackgroundColor="White"
                         />
-                </StackLayout>
+                    </StackLayout>
+                </Grid>
+                
+                
             </Grid>
-            
         </ContentView>
 
 
-        <ContentView x:Name="FrontCard" IsVisible="false">
+        <ContentView x:Name="FrontCard" IsVisible="true">
             <Grid RowDefinitions="*, Auto, Auto, Auto, 25">
                 
                 <BoxView 
@@ -218,13 +292,26 @@
                         TextColor="White" 
                         BackgroundColor="{StaticResource AccentColor}"
                         Clicked="AddToCart_Clicked"/>
+                <lottie:AnimationView
+                        x:Name="animationView"
+                        Grid.Row="3"
+                        Animation="tick.json"
+                        AnimationSource="AssetOrBundle"
+                        HeightRequest="40"
+                        HorizontalOptions="Center"
+                        IsVisible="False"
+                        OnFinishedAnimation="animationView_OnFinishedAnimation"
+                        RepeatCount="0"
+                        RepeatMode="Restart"
+                        VerticalOptions="Center"
+                        WidthRequest="40" />
 
                 <!-- hit box for pangesture recognizer -->
                 <BoxView Grid.Row="4">
                     <BoxView.GestureRecognizers>
-                        <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated" />
-                        <!--<SwipeGestureRecognizer Direction="Up" Swiped="SwipeUp_Swiped" />
-                        <SwipeGestureRecognizer Direction="Down" Swiped="SwipeDown_Swiped" />-->
+                        <!--<PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated" />-->
+                        <SwipeGestureRecognizer Direction="Up" Swiped="SwipeUp_Swiped" />
+                        <SwipeGestureRecognizer Direction="Down" Swiped="SwipeDown_Swiped" />
                     </BoxView.GestureRecognizers>
                 </BoxView>
                 

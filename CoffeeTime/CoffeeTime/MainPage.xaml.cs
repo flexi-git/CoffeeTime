@@ -24,6 +24,7 @@ namespace CoffeeTime
         private double pageHeight;
         private double thumbHeight = 25;
         private double openThreshold = -300;
+
         enum PageStates
         {
             Closed,
@@ -41,31 +42,42 @@ namespace CoffeeTime
             base.OnSizeAllocated(width, height);
             pageHeight = height;
             SetupStates();
+            animateStates.Go(PageStates.Closed);
         }
         private void MainPage_SizeChanged(object sender, EventArgs e)
         {
         }
 
+        int revealSpeed = 500;
+        int peekHeight = 80;
         private void SetupStates()
         {
-            animateStates = new AnimationStateMachine(); 
 
-            animateStates.Add(PageStates.Closed, new ViewTransition[]
-            {
+            animateStates = new AnimationStateMachine();
+
+            animateStates.Add(PageStates.Closed, new ViewTransition[] {
                 new ViewTransition(FrontCard, AnimationType.TranslationY, 0),
-                new ViewTransition(Thumb, AnimationType.Opacity, 0)
+                new ViewTransition(Thumb,  AnimationType.Opacity, 0),
+                // MyBag and PeekDetails,
+                new ViewTransition(PeekDetails, AnimationType.Opacity, 1, length:0),
+                new ViewTransition(MyBagDetails, AnimationType.TranslationY, this.Height, length:0),
             });
 
-            animateStates.Add(PageStates.Peek, new ViewTransition[]
-            {
-                new ViewTransition(FrontCard, AnimationType.TranslationY, -100, easing:Easing.SpringOut),
-                new ViewTransition(Thumb, AnimationType.Opacity, 1)
+            animateStates.Add(PageStates.Peek, new ViewTransition[] {
+                new ViewTransition(FrontCard, AnimationType.TranslationY, -peekHeight,length:(uint)revealSpeed, easing:Easing.CubicIn),
+                new ViewTransition(Thumb,  AnimationType.Opacity, 1),
+                // MyBag and PeekDetails,
+                new ViewTransition(PeekDetails, AnimationType.Opacity, 1, delay:revealSpeed, length:250),
+                new ViewTransition(MyBagDetails, AnimationType.TranslationY, this.Height, length:(uint)revealSpeed, easing: Easing.CubicIn),
             });
 
-            animateStates.Add(PageStates.Open, new ViewTransition[]
-            {
-                new ViewTransition(FrontCard, AnimationType.TranslationY, -(this.Height - 25), easing:Easing.SpringIn),
-                new ViewTransition(Thumb, AnimationType.Opacity, 1)
+            animateStates.Add(PageStates.Open, new ViewTransition[] {
+                new ViewTransition(FrontCard, AnimationType.TranslationY, -(this.Height - 25), length:(uint)revealSpeed, easing:Easing.CubicIn),
+                new ViewTransition(Thumb,  AnimationType.Opacity, 1),
+                // MyBag and PeekDetails,
+                new ViewTransition(PeekDetails, AnimationType.Opacity, 0, delay:250),
+                new ViewTransition(MyBagDetails, AnimationType.TranslationY, 0, length:(uint)revealSpeed,
+                easing:Easing.CubicIn)
             });
         }
 
@@ -104,9 +116,41 @@ namespace CoffeeTime
             }
         }
 
-        private void AddToCart_Clicked(object sender, EventArgs e)
+        private async void AddToCart_Clicked(object sender, EventArgs e)
         {
+            // change the button image when click
+            AddToCart.Text = "";
+            animationView.IsVisible = true;
+            animationView.PlayAnimation();
+
+            // change to peek view
             animateStates.Go(PageStates.Peek);
+
+            // add item to cart and animate
+            ShoppingCartItem shopcartItem = new ShoppingCartItem(this.viewModels.SelectedItem);
+            viewModels.Items.Add(shopcartItem);
+
+            // animate cart price
+            UpdateShoppingCartPeekTotal();
+
+            // animate the added item
+            var lastItem = PeekItems.Children.LastOrDefault();
+            lastItem.Scale = 0;
+            await Task.Delay(250);
+            await lastItem.ScaleTo(1, 1000, Easing.BounceOut);
+
+        }
+        private void UpdateShoppingCartPeekTotal()
+        {
+            var textPrice = viewModels.TotalPrice.ToString("0.00");
+            var decimalLocation = textPrice.IndexOf('.');
+            // split out the dollar and cents
+            string dollar = textPrice.Substring(0, decimalLocation);
+            string cents = textPrice.Substring(decimalLocation + 1, textPrice.Length - (decimalLocation + 1));
+
+            PeekDollarFlip.NumberOfCharacters = dollar.Length;
+            PeekCentsFlip.Text = cents;
+            PeekDollarFlip.Text = dollar;
         }
 
         private void SwipeUp_Swiped(object sender, SwipedEventArgs e)
@@ -116,12 +160,19 @@ namespace CoffeeTime
 
         private void SwipeDown_Swiped(object sender, SwipedEventArgs e)
         {
-            animateStates.Go(PageStates.Peek);
+            if((PageStates)animateStates.CurrentState == PageStates.Open)
+            {
+                animateStates.Go(PageStates.Peek);
+            }
+            else
+            {
+                animateStates.Go(PageStates.Closed);
+            }
         }
 
         private void SmallSized_Tapped(object sender, EventArgs e)
         {
-            //viewModels.SelectedItem.Size = "S";
+            viewModels.SelectedItem.Size = "S";
             UpdateSizePrice(viewModels.SelectedItem.SmallPrice);
             //UpdateSizeSelection(SelectedSize.small);
             UpdateSizeSelectionMyVersion(SmallRect, SmallCup);
@@ -130,7 +181,7 @@ namespace CoffeeTime
 
         private void MediumSized_Tapped(object sender, EventArgs e)
         {
-            //viewModels.SelectedItem.Size = "M";
+            viewModels.SelectedItem.Size = "M";
             UpdateSizePrice(viewModels.SelectedItem.MediumPrice);
             //UpdateSizeSelection(SelectedSize.medium);
             UpdateSizeSelectionMyVersion(MediumRect, MediumCup);
@@ -138,7 +189,7 @@ namespace CoffeeTime
 
         private void LargeSized_Tapped(object sender, EventArgs e)
         {
-            //viewModels.SelectedItem.Size = "L";
+            viewModels.SelectedItem.Size = "L";
             UpdateSizePrice(viewModels.SelectedItem.LargePrice);
             //UpdateSizeSelection(SelectedSize.large);
             UpdateSizeSelectionMyVersion(LargeRect, LargeCup);
@@ -237,6 +288,20 @@ namespace CoffeeTime
             // update the stroke on the cup
             cup.Stroke = selectedStroke;
 
+        }
+
+        private void RemoveItemFromCart_Tapped(object sender, EventArgs e)
+        {
+            var item = ((View)sender).BindingContext as ShoppingCartItem;
+            viewModels.Items.Remove(item);
+            UpdateShoppingCartPeekTotal();
+        }
+
+        private async void animationView_OnFinishedAnimation(object sender, EventArgs e)
+        {
+            await Task.Delay(500);
+            animationView.IsVisible = false;
+            AddToCart.Text = "Add 1 more";
         }
     }
 }

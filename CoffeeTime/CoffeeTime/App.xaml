@@ -44,6 +44,13 @@
             <Setter Property="TextColor" Value="{StaticResource TextColor}" />
         </Style>
 
+        <Style x:Key="PeekTotalText" TargetType="Label">
+            <Setter Property="FontFamily" Value="SemiBoldFont" />
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="TextColor" Value="White" />
+        </Style>
+
         <Style x:Key="ShoppingItemHeader" TargetType="Label">
             <Setter Property="FontFamily" Value="SemiBoldFont" />
             <Setter Property="FontSize" Value="16" />
